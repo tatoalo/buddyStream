@@ -1,11 +1,13 @@
 import _pickle as pickle
+import base64
+import os
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 import time
 
 
-def init_chrome():
+def init_chrome(url):
     opt_args = Options()
     opt_args.add_argument("--no-sandbox")
     opt_args.add_argument("--remote-debugging-port=9222")
@@ -17,7 +19,7 @@ def init_chrome():
 
     cookies = import_session_cookies(browser)
     time.sleep(2)
-    browser.get("https://app.buddyfit.club/classes/replay/8a1d6bc3-0273-4b66-96f5-326d8ab23bf2/live")
+    browser.get(url)
 
     return browser, cookies
 
@@ -46,11 +48,12 @@ def extract_keys():
         close_browser()
 
 
-def logged_checker(b):
+def logged_checker(b, url):
     try:
         # time.sleep(1)
         login_button = b.find_element_by_xpath("//button[@class='button is-medium is-fullwidth is-rounded is-primary']")
         handle_login(b, login_button)
+        b.get(url)
 
     except NoSuchElementException:
         print("Login needed but could not find button!")
@@ -68,7 +71,7 @@ def handle_login(b, button):
 
     button.click()
 
-    time.sleep(5)
+    time.sleep(2)
 
     try:
         expecting_nothing = b.find_element_by_xpath("//button[@class='button is-medium is-fullwidth is-rounded is-primary']")
@@ -103,11 +106,42 @@ def import_session_cookies(b):
         return False
 
 
+def retrieve_file(b):
+    try:
+        # uri = b.find_element_by_xpath("//video[@id='MsPlayer-video']")
+        # uri = b.find_element_by_xpath("//div[@id='video']/msvd/video").get_attribute("src")
+        # uri = b.find_element_by_tag_name('video')
+        return b.page_source
+        # result = b.execute_async_script("""
+        # var uri = arguments[0];
+        # var callback = arguments[1];
+        # var toBase64 = function(buffer){for(var r,n=new Uint8Array(buffer),t=n.length,a=new Uint8Array(4*Math.ceil(t/3)),i=new Uint8Array(64),o=0,c=0;64>c;++c)i[c]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charCodeAt(c);for(c=0;t-t%3>c;c+=3,o+=4)r=n[c]<<16|n[c+1]<<8|n[c+2],a[o]=i[r>>18],a[o+1]=i[r>>12&63],a[o+2]=i[r>>6&63],a[o+3]=i[63&r];return t%3===1?(r=n[t-1],a[o]=i[r>>2],a[o+1]=i[r<<4&63],a[o+2]=61,a[o+3]=61):t%3===2&&(r=(n[t-2]<<8)+n[t-1],a[o]=i[r>>10],a[o+1]=i[r>>4&63],a[o+2]=i[r<<2&63],a[o+3]=61),new TextDecoder("ascii").decode(a)};
+        # var xhr = new XMLHttpRequest();
+        # xhr.responseType = 'arraybuffer';
+        # xhr.onload = function(){ callback(toBase64(xhr.response)) };
+        # xhr.onerror = function(){ callback(xhr.status) };
+        # xhr.open('GET', uri);
+        # xhr.send();
+        # """, uri)
+        # if type(result) == int :
+        #     raise Exception("Request failed with status %s" % result)
+        #
+        # return base64.b64decode(result)
+
+    except NoSuchElementException:
+        print("Video source not found!")
+
+
 def main():
-    b, cookies_flag = init_chrome()
+
+    video = "https://app.buddyfit.club/classes/replay/7f2de072-2eb4-4eed-9f84-011af4b11395/live"
+    b, cookies_flag = init_chrome(url=video)
 
     if not cookies_flag:
-        logged_checker(b)
+        logged_checker(b, video)
+
+    time.sleep(2)
+    print(retrieve_file(b))
 
     if input("Quit?") == "Y":
         close_browser(b)

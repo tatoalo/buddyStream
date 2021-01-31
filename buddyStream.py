@@ -2,6 +2,7 @@ import time
 import ffpb
 import tqdm
 import sys
+import subprocess
 import _pickle as pickle
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -13,7 +14,7 @@ class ProgressBar(tqdm.tqdm):
         super().update(n)
 
 
-def init_chrome(url):
+def init_chrome():
     opt_args = Options()
     opt_args.add_argument("--no-sandbox")
     opt_args.add_argument("--remote-debugging-port=9222")
@@ -21,20 +22,21 @@ def init_chrome(url):
     opt_args.add_argument("--window-size=1920,1080")
     opt_args.add_argument("--disable-gpu")
 
-    browser = webdriver.Chrome(options=opt_args)
+    b = webdriver.Chrome(options=opt_args)
 
-    cookies = import_session_cookies(browser)
-    time.sleep(2)
-    browser.get(url)
-
-    return browser, cookies
+    return b
+    # cookies = import_session_cookies(browser)
+    # time.sleep(2)
+    # browser.get(url)
+    #
+    # return browser, cookies
 
 
 def close_browser(b):
     b.close()
 
 
-def extract_keys():
+def extract_keys(b):
     try:
         with open("keys") as f:
             auth_data = f.read()
@@ -48,10 +50,31 @@ def extract_keys():
             return auth_info[0], auth_info[1]
 
     except FileNotFoundError:
-        print("*** file doesn't exists, creating 'keys'"
-              " file, now fill it with data! ... exiting ***")
         open("keys", 'w')
-        close_browser()
+        close_browser(b)
+        sys.exit("*** file doesn't exists, creating 'keys'"
+                 " file, now fill it with data! ... exiting ***")
+    except IndexError:
+        sys.exit("error in reading keys, have you correctly inserted the login data?")
+
+
+def extract_video_URLs():
+    try:
+        with open("video_links") as f:
+            data = f.read()
+
+            links = []
+
+            for s in data.splitlines():
+                if not (s == ''):
+                    links.append(s)
+
+            return links
+
+    except FileNotFoundError:
+        open("video_links", 'w')
+        sys.exit("*** file doesn't exists, creating 'video_links'"
+                 " file, now fill it with URLs! ... exiting ***")
 
 
 def logged_checker(b, url):
@@ -61,12 +84,12 @@ def logged_checker(b, url):
         b.get(url)
 
     except NoSuchElementException:
-        print("Login needed but could not find button!")
+        clean_cookies()
+        sys.exit("Login needed but could not find button!")
 
 
 def handle_login(b, button):
-
-    e, p = extract_keys()
+    e, p = extract_keys(b)
 
     email = b.find_element_by_xpath("//input[@type='email']")
     psw = b.find_element_by_xpath("//input[@type='password']")
@@ -79,7 +102,8 @@ def handle_login(b, button):
     time.sleep(2)
 
     try:
-        expecting_nothing = b.find_element_by_xpath("//button[@class='button is-medium is-fullwidth is-rounded is-primary']")
+        expecting_nothing = b.find_element_by_xpath(
+            "//button[@class='button is-medium is-fullwidth is-rounded is-primary']")
         print("Login Failed")
         close_browser(b)
     except NoSuchElementException:
@@ -111,33 +135,51 @@ def import_session_cookies(b):
         return False
 
 
-def retrieve_file(b):
+def download_video(b):
     try:
         b.switch_to.frame(b.find_elements_by_tag_name("iframe")[0])
-        url = b.find_element_by_xpath("//source[@id='MSVD-VideoSource']").get_attribute("src").split("?")[0]
+        url = b.find_element_by_xpath("//source[@id='MSVD-VideoSource']").get_attribute("src").split("?")
+        file_name = url[1]+".mp4"
 
-        commands = ["-i", url, "-c", "copy", "output.mp4"]
+        commands = ["-i", url[0], "-c", "copy", file_name]
         ffpb.main(argv=commands, stream=sys.stderr, encoding=None, tqdm=ProgressBar)
-
+        subprocess.run(["mv", file_name, "videos/"])
     except NoSuchElementException:
         print("Video source not found!")
+    except IndexError:
+        print("Error founding frame...")
+
+
+def clean_cookies():
+    subprocess.run(["rm", "cookies"])
 
 
 def main():
 
-    video = "https://app.buddyfit.club/classes/replay/7f2de072-2eb4-4eed-9f84-011af4b11395/live"
-    b, cookies_flag = init_chrome(url=video)
+    subprocess.run(["mkdir", "videos"])
+    videos = extract_video_URLs()
 
-    if not cookies_flag:
-        logged_checker(b, video)
+    b = init_chrome()
 
-    time.sleep(2)
-    retrieve_file(b)
+    for n, link in enumerate(videos):
+        if n == 0:
+            cookies = import_session_cookies(b)
+            time.sleep(2)
+            b.get(link)
+            if not cookies:
+                logged_checker(b, link)
+            time.sleep(2)
+            download_video(b)
+        else:
+            b.get(link)
+            time.sleep(2)
+            download_video(b, n)
 
-    if input("Quit?") == "Y":
-        close_browser(b)
-    else:
-        close_browser(b)
+    # time.sleep(2)
+    # download_video(b)
+
+    # clean_cookies()
+    close_browser(b)
 
 
 if __name__ == "__main__":

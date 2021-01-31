@@ -1,6 +1,8 @@
 # Project-specific
 keys
 cookies
+*.mp4
+*.mkv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

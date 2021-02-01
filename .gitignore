@@ -4,6 +4,7 @@ cookies
 video_links
 *.mp4
 *.mkv
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

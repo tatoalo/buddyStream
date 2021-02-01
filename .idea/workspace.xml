@@ -4,7 +4,6 @@
     <list default="true" id="73233ab3-f675-45ed-bcc6-4c80a722f3a4" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buddyStream.py" beforeDir="false" afterPath="$PROJECT_DIR$/buddyStream.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,6 +14,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="Setup Script" />
       </list>
     </option>
   </component>
@@ -72,7 +72,8 @@
       <workItem from="1612018245080" duration="1136000" />
       <workItem from="1612019910465" duration="90000" />
       <workItem from="1612020010616" duration="5858000" />
-      <workItem from="1612101282832" duration="8453000" />
+      <workItem from="1612101282832" duration="8486000" />
+      <workItem from="1612187399502" duration="97000" />
     </task>
     <servers />
   </component>

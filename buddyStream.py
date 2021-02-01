@@ -134,11 +134,11 @@ def download_video(b):
     try:
         b.switch_to.frame(b.find_elements_by_tag_name("iframe")[0])
         url = b.find_element_by_xpath("//source[@id='MSVD-VideoSource']").get_attribute("src").split("?")
-        file_name = url[1]+".mp4"
+        file_name = "videos/"+url[1]+".mp4"
 
         commands = ["-i", url[0], "-c", "copy", file_name]
         ffpb.main(argv=commands, stream=sys.stderr, encoding=None, tqdm=ProgressBar)
-        subprocess.run(["mv", file_name, "videos/"])
+
     except NoSuchElementException:
         print("Video source not found!")
     except IndexError:
@@ -168,7 +168,7 @@ def main():
         else:
             b.get(link)
             time.sleep(2)
-            download_video(b, n)
+            download_video(b)
 
     clean_cookies()
     close_browser(b)

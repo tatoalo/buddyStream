@@ -5,7 +5,7 @@ import sys
 import subprocess
 import _pickle as pickle
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, NoSuchWindowException
 from selenium.webdriver.chrome.options import Options
 
 
@@ -28,7 +28,11 @@ def init_chrome():
 
 
 def close_browser(b):
-    b.close()
+    try:
+        b.close()
+    except NoSuchWindowException:
+        sys.exit("Browser already closed.")
+
 
 
 def extract_keys(b):

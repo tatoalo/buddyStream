@@ -18,18 +18,13 @@ def init_chrome():
     opt_args = Options()
     opt_args.add_argument("--no-sandbox")
     opt_args.add_argument("--remote-debugging-port=9222")
-    # opt_args.add_argument("--headless")
+    opt_args.add_argument("--headless")
     opt_args.add_argument("--window-size=1920,1080")
     opt_args.add_argument("--disable-gpu")
 
     b = webdriver.Chrome(options=opt_args)
 
     return b
-    # cookies = import_session_cookies(browser)
-    # time.sleep(2)
-    # browser.get(url)
-    #
-    # return browser, cookies
 
 
 def close_browser(b):
@@ -122,7 +117,7 @@ def import_session_cookies(b):
     try:
         with open("cookies", 'rb') as ck:
             session_cookies = pickle.load(ck)
-            # Forcing cookie domain
+
             b.get("https://app.buddyfit.club")
             for c in session_cookies:
                 b.add_cookie(c)
@@ -175,10 +170,7 @@ def main():
             time.sleep(2)
             download_video(b, n)
 
-    # time.sleep(2)
-    # download_video(b)
-
-    # clean_cookies()
+    clean_cookies()
     close_browser(b)
 
 

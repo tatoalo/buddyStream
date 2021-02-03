@@ -10,6 +10,9 @@ Why? During the COVID-19 lockdown, my ISP was kinda lame, as a result I had issu
 
 Hopefully this doesn't break the end user agreement for Buddyfit. Since I'm simply saving the HLS stream to disk as if we were a browser, this does not abuse the streaming endpoints. However I take NO responsibility if some trainer with a bunch of muscles will knock on your door wanting to have a little chat with you.
 
+___
+Logo by *catalyst*
+
 ## Prereqs
 
 - [**Python 3.8**][python]: Tested on 3.8. YOU ARE ON YOUR OWN.

@@ -7,11 +7,18 @@ import _pickle as pickle
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, NoSuchWindowException
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import json
 
 
 class ProgressBar(tqdm.tqdm):
     def update(self, n):
         super().update(n)
+
+
+def process_browser_log_entry(entry):
+    response = json.loads(entry['message'])['message']
+    return response
 
 
 def init_chrome():
@@ -22,7 +29,10 @@ def init_chrome():
     opt_args.add_argument("--window-size=1920,1080")
     opt_args.add_argument("--disable-gpu")
 
-    b = webdriver.Chrome(options=opt_args)
+    caps = DesiredCapabilities.CHROME
+    caps['goog:loggingPrefs'] = {'performance': 'ALL'}
+
+    b = webdriver.Chrome(options=opt_args, desired_capabilities=caps)
 
     return b
 
@@ -32,7 +42,6 @@ def close_browser(b):
         b.close()
     except NoSuchWindowException:
         sys.exit("Browser already closed.")
-
 
 
 def extract_keys(b):
@@ -51,7 +60,7 @@ def extract_keys(b):
     except FileNotFoundError:
         open("keys", 'w')
         close_browser(b)
-        sys.exit("*** file doesn't exists, creating 'keys'"
+        sys.exit("*** file doesn't exist, creating 'keys'"
                  " file, now fill it with data! ... exiting ***")
     except IndexError:
         sys.exit("error in reading keys, have you correctly inserted the login data?")
@@ -72,7 +81,7 @@ def extract_video_URLs():
 
     except FileNotFoundError:
         open("video_links", 'w')
-        sys.exit("*** file doesn't exists, creating 'video_links'"
+        sys.exit("*** file doesn't exist, creating 'video_links'"
                  " file, now fill it with URLs! ... exiting ***")
 
 
@@ -145,8 +154,33 @@ def download_video(b):
 
     except NoSuchElementException:
         print("Video source not found!")
+        HLS_extraction(b)
     except IndexError:
         print("Error founding frame...")
+        HLS_extraction(b)
+
+
+def HLS_extraction(b):
+    # They changed the way they show the file, so I had to look into the networking activity logs.
+    # They appear to print the direct link directly in the console log...honeypot? :P
+    browser_log = b.get_log('performance')
+    events = [process_browser_log_entry(entry) for entry in browser_log]
+
+    try:
+        for event in events:
+            try:
+                t = event['params']
+                HLS_streams = t['headers']['location']
+            except KeyError:
+                continue
+
+        idVideo = HLS_streams.split("vod")[1].split("/")[1]
+        file_name = "videos/" + idVideo + ".mp4"
+
+        commands = ["-i", HLS_streams, "-c", "copy", file_name]
+        ffpb.main(argv=commands, stream=sys.stderr, encoding=None, tqdm=ProgressBar)
+    except IndexError:
+        print("Bad handling of id extraction?")
 
 
 def clean_cookies():

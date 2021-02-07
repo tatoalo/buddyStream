@@ -156,7 +156,7 @@ def download_video(b):
         print("Video source not found!")
         HLS_extraction(b)
     except IndexError:
-        print("Error founding frame...")
+        print("New methodology required :D")
         HLS_extraction(b)
 
 

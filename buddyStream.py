@@ -16,11 +16,6 @@ class ProgressBar(tqdm.tqdm):
         super().update(n)
 
 
-def process_browser_log_entry(entry):
-    response = json.loads(entry['message'])['message']
-    return response
-
-
 def init_chrome():
     opt_args = Options()
     opt_args.add_argument("--no-sandbox")
@@ -160,11 +155,16 @@ def download_video(b):
         HLS_extraction(b)
 
 
+def parsing_logs(entry):
+    response = json.loads(entry['message'])['message']
+    return response
+
+
 def HLS_extraction(b):
     # They changed the way they show the file, so I had to look into the networking activity logs.
     # They appear to print the direct link directly in the console log...honeypot? :P
     browser_log = b.get_log('performance')
-    events = [process_browser_log_entry(entry) for entry in browser_log]
+    events = [parsing_logs(entry) for entry in browser_log]
 
     try:
         for event in events:

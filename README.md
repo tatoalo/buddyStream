@@ -1,6 +1,7 @@
-# buddyStream
-
-![buddyStream](assets/logo.png)
+<div align="center">
+  <img src="./assets/logo.png" width="450" />
+  [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/tatoalo)
+</div>
 
 # Saves Buddyfit videos for offline enjoyment
 

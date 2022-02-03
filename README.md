@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./assets/logo.png" width="450" />
 
-  [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/tatoalo)
+  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F7ABOVF)
 </div>
 
 # Saves Buddyfit videos for offline enjoyment
